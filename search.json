@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "sources.html",
+    "href": "sources.html",
+    "title": "Sources",
+    "section": "",
+    "text": "The two sources I used for data were 17Lands and MTGJSON.\n17Lands collects the drafting record of users to see, among other things, which cards have the highest win rates in draft. We used the 17lands Card Data from the last two years of Standard sets, and the MTGJSON card data for the cards in those sets. The 17lands card data we used contains data from when the set was released to July 31st, 2024, and is included in the Github repo. The MTGJSON card data is the cards.csv file that can be downloaded here."
+  },
+  {
+    "objectID": "modeling.html",
+    "href": "modeling.html",
+    "title": "modelling",
+    "section": "",
+    "text": "Warning: Rows containing NAs were excluded from the model.\n\n\n\n\nWarning: Rows containing NAs were excluded from the model.\n\n\n\n\nWarning: Rows containing NAs were excluded from the model.\n\n\n\n\nUsing 10 posterior draws for ppc type 'dens_overlay' by default.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nBeta\n95% CI1\n\n\n\n\nRarity\n\n\n\n\n\n\n    RarityM\n0.54\n-0.84, 1.9\n\n\n    RarityR\n0.28\n-0.55, 1.1\n\n\n    RarityU\n0.27\n-0.55, 1.1\n\n\nmanaValue\n-0.13\n-0.31, 0.05\n\n\nRarity * manaValue\n\n\n\n\n\n\n    RarityM * manaValue\n0.65\n0.32, 0.98\n\n\n    RarityR * manaValue\n0.55\n0.29, 0.80\n\n\n    RarityU * manaValue\n0.05\n-0.20, 0.29\n\n\n\n1 CI = Credible Interval\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSaving 7 x 5 in image"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Overview",
+    "section": "",
+    "text": "Magic: the Gathering is a fun game, but winning at Magic: the Gathering is even more fun, and to do that, it’s good to know which cards let us win the most. We built a data set combining data from 17lands and MTGJSON about cards from draftable sets released in the last 2 years. We specifically cared about ‘Game in Hand Win Rate’ , the percentage of time you won a game when you saw a given card in your hand during that game.\nWe modeled this win rate, a percentage between 0% and 100% (though generally between 35 and 70), as a linear function of mana cost (the cost of a card in-game), and rarity (how rare it is to see the card in draft). While increases in mana cost are associated with worse win rates for common and uncommon cards, for rare and mythic rare cards, a mana cost one higher increases the expected win rate when seen by 0.65% and 0.55%, respectively, with an approximate error of \\(\\pm\\) 0.3%.list."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "I’m Grant Quattlebaum, I’m an aspiring computer scientist, my Github profile is GrantQ9 and my email address is grantq9@gmail.com.\nThis project is about building models to see how certain card traits of Magic: the Gathering cards impact their usefulness in draft. For access to all the data and code used in the project, see the Github page here.\nThis project was done as part of my time in Kane’s Data Science Bootcamp."
+  },
+  {
+    "objectID": "creatures.html",
+    "href": "creatures.html",
+    "title": "Creature Analysis",
+    "section": "",
+    "text": "WIP"
+  },
+  {
+    "objectID": "model.html",
+    "href": "model.html",
+    "title": "Model",
+    "section": "",
+    "text": "WIP"
+  },
+  {
+    "objectID": "model.html#model-formula",
+    "href": "model.html#model-formula",
+    "title": "Model",
+    "section": "Model Formula",
+    "text": "Model Formula\n\\[GameInHandWinRate_i = \\beta_0 + \\beta_1manaValue_i + \\beta_2rarity_i + \\beta_3manaValue_i*rarity_i\\]"
+  },
+  {
+    "objectID": "model.html#model-parameters",
+    "href": "model.html#model-parameters",
+    "title": "Model",
+    "section": "Model Parameters",
+    "text": "Model Parameters"
+  },
+  {
+    "objectID": "predictions.html",
+    "href": "predictions.html",
+    "title": "Predictions",
+    "section": "",
+    "text": "WIP"
+  }
+]
