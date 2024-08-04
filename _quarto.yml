@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Determining the Quality of Magic: the Gathering Cards for Drafting"
+  title: "Quality of Magic: the Gathering Cards for Draft"
   navbar:
     left:
       - href: index.qmd
