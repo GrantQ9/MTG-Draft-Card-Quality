@@ -1,5 +1,7 @@
 ---
-title: "Creature Analysis"
+title: "Sources"
 ---
 
-WIP
+The two sources I used for data were [17Lands](https://www.17lands.com/card_data) and [MTGJSON](https://mtgjson.com).
+
+17Lands collects the drafting record of users to see, among other things, which cards have the highest win rates in draft. We used the 17lands Card Data from the last two years of Standard sets, and the MTGJSON card data for the cards in those sets. The 17lands card data we used contains data from when the set was released to July 31st, 2024, and is included in the Github repo. The MTGJSON card data is the cards.csv file that can be downloaded [here](https://mtgjson.com/api/v5/csv/).

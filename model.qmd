@@ -3,3 +3,11 @@ title: "Model"
 ---
 
 WIP
+
+## Model Formula
+
+$$GameInHandWinRate_i = \beta_0 + \beta_1manaValue_i + \beta_2rarity_i + \beta_3manaValue_i*rarity_i$$
+
+## Model Parameters
+
+![](mana_rarity_reg_table.png)
