@@ -2,12 +2,20 @@ project:
   type: website
 
 website:
-  title: "MTG-Draft-Card-Quality"
+  title: Evaluating The Quality of Magic: the Gathering Cards for Drafting
   navbar:
     left:
       - href: index.qmd
         text: Home
       - about.qmd
+      - href: model.qmd
+        text: Model
+      - href: creatures.qmd
+        text: Creature Analysis
+      - href: predictions.qmd
+        text: Predictions
+      - href: sources.qmd
+        text: Sources
 
 format:
   html:

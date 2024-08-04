@@ -2,8 +2,8 @@
 title: "About"
 ---
 
-About this site
+I'm Grant Quattlebaum, I'm an aspiring computer scientist, my Github profile is [GrantQ9](https://github.com/GrantQ9) and my email address is <grantq9@gmail.com>.
 
-```{r}
-1 + 1
-```
+This project is about XXXXXXXX. For access to all the data and code used in the project, see the Github page  [here](https://github.com/GrantQ9/MTG-Draft-Card-Quality).
+
+This project was done as part of my time in [Kane's Data Science Bootcamp](https://bootcamp.davidkane.info/).

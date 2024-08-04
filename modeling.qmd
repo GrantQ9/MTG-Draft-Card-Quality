@@ -16,6 +16,7 @@ library(dplyr)
 library(readr)
 library(brms)
 library(tidybayes)
+library(gtsummary)
 
 setwd("data/")
 standard_data <- list.files(pattern = "card-ratings") |>
@@ -113,9 +114,35 @@ third_fit <-brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue + Col
 ```{r}
 #| label: graph_1
 
-first_fit
+pp_check(first_fit)
 
-second_fit
+first_fit |> tbl_regression()
+
+Rarity = c("C", "U", "R", "M")
+manaValue = c(1,2,3,4,5)
+ndata <- expand_grid(Rarity, manaValue)
+reorder <- c('1_Mana Common', "1_Mana Uncommon", '1_Mana Rare', '1_Mana Mythic Rare', '2_Mana Common', "2_Mana Uncommon", '2_Mana Rare', '2_Mana Mythic Rare','3_Mana Common', "3_Mana Uncommon", '3_Mana Rare', '3_Mana Mythic Rare','4_Mana Common', "4_Mana Uncommon", '4_Mana Rare', '4_Mana Mythic Rare','5_Mana Common', "5_Mana Uncommon", '5_Mana Rare', '5_Mana Mythic Rare')
+
+
+first_fit |> add_epred_draws(newdata = ndata) |>
+  ungroup() |>
+  #mutate(manaValue = as.Character(manaValue)) |>
+  mutate(Rarity = recode(Rarity, C = "Mana Common", U = "Mana Uncommon", R = "Mana Rare", M = "Mana Mythic Rare")) |>
+  select(Rarity, manaValue, .epred) |>
+  pivot_wider(names_from = c(manaValue, Rarity),
+              values_from = .epred,
+              values_fn = list) |>
+  unnest(cols = everything()) |>
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "epred") |> 
+  mutate(Category = fct_relevel(factor(Category), reorder)) |>
+  ggplot(aes(x = epred, y = Category)) +
+    stat_slab(aes(fill = Category), color = "black", alpha = 0.7) +
+    labs(title = "Posterior Distributions of 20 Categories",
+       x = "epred",
+       y = "Category") +
+    theme_minimal() +
+    theme(legend.position = "none")
+
 
 ```
 
