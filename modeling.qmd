@@ -1,0 +1,124 @@
+---
+title: "modelling"
+author: "Grant Quattlebaum"
+format: html
+execute:
+  echo: false
+---
+
+```{r}
+#| message: false
+#| label: setup
+#| warning: false
+
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(brms)
+library(tidybayes)
+
+setwd("data/")
+standard_data <- list.files(pattern = "card-ratings") |>
+  lapply(read_csv) |>
+  bind_rows()
+card_text_data <- read_csv("cards.csv")
+setwd("..")
+```
+
+```{r}
+#| label: clean
+  
+c_standard_data <- standard_data |>
+  rename(GIH_WR = `GIH WR`) |>
+  #Have GIH_WR stored in R numerically for manipulation
+  mutate(GIH_WR = as.numeric(sub("%","",GIH_WR))) |>
+  select(Name, Color, Rarity, GIH_WR)
+
+#Select the current standard sets
+c_card_data <-
+  card_text_data[card_text_data$setCode %in% c("BRO", "LCI", "MKM", "MOM", "ONE", "OTJ", "WOE", "BRR", "OTP", "BIG", "DMU"),] |>
+  select(name, manaValue, power, toughness, types, keywords) |>
+  rename(Name = name) |>
+  distinct(.keep_all = TRUE) |>
+  mutate(isCreature = grepl("Creature", types, fixed = TRUE))
+
+# Below code removes 2nd name for double sided cards: note that if modal double sided cards are in the data, this would have to change to account for both sides of the card.
+c_card_data$Name <- ifelse(grepl(" // ", c_card_data$Name), sub(" // .*", "", c_card_data$Name), c_card_data$Name)
+```
+
+```{r}
+#| label: merge_and_creature
+
+merged_data <- c_standard_data |>
+  left_join(c_card_data, join_by(Name), relationship =
+  "many-to-many") 
+
+merged_data[c("Color")][is.na(merged_data[c("Color")])] <- "C"
+
+creature_data <- merged_data |> 
+  filter(isCreature == TRUE) |>
+  mutate(hasFlying = grepl("Flying", keywords, fixed = TRUE)) |>
+  mutate(hasTrample = grepl("Trample", keywords, fixed = TRUE)) |>
+  mutate(powerTier = case_when(power < 2 ~ 1,
+                             power > 3 ~ 3,
+                             TRUE ~ 2)) |>
+  mutate(toughnessTier = case_when(toughness < 2 ~ 1,
+                             toughness > 3 ~ 3,
+                             TRUE ~ 2)) |>
+  select(Rarity, GIH_WR, manaValue, powerTier, toughnessTier, hasFlying, hasTrample)
+```
+
+```{r}
+#| label: model_1
+#| cache: true
+
+first_fit <- brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue,
+                   data = merged_data,
+                   family = gaussian(),
+                   refresh = 0,
+                   silent = 2,
+                   seed = 31)
+
+```
+
+
+```{r}
+#| label: model_2
+#| cache: true
+
+second_fit <- brm(formula = GIH_WR ~ Rarity + manaValue + powerTier + toughnessTier + hasFlying + hasTrample + Rarity * manaValue + hasFlying*manaValue + hasTrample*manaValue + powerTier*manaValue + toughnessTier*manaValue + Rarity*manaValue*powerTier,
+                   data = creature_data,
+                   family = gaussian(),
+                   refresh = 0,
+                   silent = 2,
+                   seed = 31)
+```
+
+```{r}
+#| label: model_3
+#| cache: true
+
+mono_color <- merged_data |>
+  filter(Color == "G" | Color == "W" | Color == "U" | Color == "B" | Color == "R" | Color == "C")
+
+third_fit <-brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue + Color,
+                   data = mono_color,
+                   family = gaussian(),
+                   refresh = 0,
+                   silent = 2,
+                   seed = 31)
+```
+
+
+```{r}
+#| label: graph_1
+
+first_fit
+
+second_fit
+
+```
+
+
+
+
