@@ -126,6 +126,10 @@ window.Quarto = {
 <span class="menu-text">Model</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./predictions.html"> 
+<span class="menu-text">Predictions</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./sources.html"> 
 <span class="menu-text">Sources</span></a>
   </li>  
@@ -155,7 +159,7 @@ window.Quarto = {
 
 <p><img src="main_graph.png" class="img-fluid"></p>
 <p>Magic: the Gathering is a fun game, but winning at Magic: the Gathering is even more fun, and to do that, it’s good to know which cards let us win the most. We built a data set combining data from 17lands and MTGJSON about cards from draftable sets released in the last 2 years. We specifically cared about ‘Game in Hand Win Rate’ , the percentage of time you won a game when you saw a given card in your hand during that game.</p>
-<p>We modeled this win rate, a percentage between 0% and 100% (though generally between 35 and 70), as a linear function of mana cost (the cost of a card in-game), and rarity (how rare it is to see the card in draft). While increases in mana cost are associated with worse win rates for common and uncommon cards, for rare and mythic rare cards, a mana cost one higher increases the expected win rate when seen by 0.65% and 0.55%, respectively, with an approximate error of <span class="math inline">\(\pm\)</span> 0.3%.</p>
+<p>We modeled this win rate, a percentage between 0% and 100% (though generally between 35% and 70%), as a linear function of mana cost (the cost of a card in-game), and rarity (how rare it is to see the card in draft). While increases in mana cost are associated with worse win rates for common and uncommon cards, for rare and mythic rare cards, a mana cost one higher increases the expected win rate when seen by 0.65% and 0.55%, respectively, with an approximate error of <span class="math inline">\(\pm\)</span> 0.3%.</p>
 
 
 

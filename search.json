@@ -7,11 +7,18 @@
     "text": "The two sources I used for data were 17Lands and MTGJSON.\n17Lands collects the drafting record of users to see, among other things, which cards have the highest win rates in draft. We used the 17lands Card Data from the last two years of Standard sets, and the MTGJSON card data for the cards in those sets. The 17lands card data we used contains data from when the set was released to July 31st, 2024, and is included in the Github repo. The MTGJSON card data is the cards.csv file that can be downloaded here."
   },
   {
+    "objectID": "modeling.html",
+    "href": "modeling.html",
+    "title": "modelling",
+    "section": "",
+    "text": "Warning: Rows containing NAs were excluded from the model.\n\n\n\n\nUsing 10 posterior draws for ppc type 'dens_overlay' by default.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCharacteristic\nBeta\n95% CI1\n\n\n\n\nRarity\n\n\n\n\n\n\n    RarityM\n0.54\n-0.84, 1.9\n\n\n    RarityR\n0.28\n-0.55, 1.1\n\n\n    RarityU\n0.27\n-0.55, 1.1\n\n\nmanaValue\n-0.13\n-0.31, 0.05\n\n\nRarity * manaValue\n\n\n\n\n\n\n    RarityM * manaValue\n0.65\n0.32, 0.98\n\n\n    RarityR * manaValue\n0.55\n0.29, 0.80\n\n\n    RarityU * manaValue\n0.05\n-0.20, 0.29\n\n\n\n1 CI = Credible Interval\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSaving 7 x 5 in image\n\n\n\n\nRows: 271 Columns: 19\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (10): Name, Color, Rarity, % GP, GP WR, OH WR, GD WR, GIH WR, GNS WR, IWD\ndbl  (9): # Seen, ALSA, # Picked, ATA, # GP, # OH, # GD, # GIH, # GNS\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\n# A tibble: 19 × 2\n   Category            avg_GIH_WR\n   &lt;fct&gt;                    &lt;dbl&gt;\n 1 1 Mana Commons            54.1\n 2 2 Mana Commons            54.9\n 3 3 Mana Commons            53.9\n 4 4 Mana Commons            54.5\n 5 5 Mana Commons            54.2\n 6 1 Mana Uncommons          54.7\n 7 2 Mana Uncommons          55.6\n 8 3 Mana Uncommons          55.6\n 9 4 Mana Uncommons          55.0\n10 5 Mana Uncommons          55.6\n11 1 Mana Rares              56.5\n12 2 Mana Rares              58.0\n13 3 Mana Rares              58.3\n14 4 Mana Rares              57.3\n15 5 Mana Rares              55.6\n16 2 Mana Mythic Rares       56.4\n17 3 Mana Mythic Rares       56.6\n18 4 Mana Mythic Rares       56.2\n19 5 Mana Mythic Rares       61.8\n\n\n\n\n\n\n\n\n\nSaving 7 x 5 in image"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Quality of Magic: the Gathering Cards for Draft",
     "section": "",
-    "text": "Magic: the Gathering is a fun game, but winning at Magic: the Gathering is even more fun, and to do that, it’s good to know which cards let us win the most. We built a data set combining data from 17lands and MTGJSON about cards from draftable sets released in the last 2 years. We specifically cared about ‘Game in Hand Win Rate’ , the percentage of time you won a game when you saw a given card in your hand during that game.\nWe modeled this win rate, a percentage between 0% and 100% (though generally between 35 and 70), as a linear function of mana cost (the cost of a card in-game), and rarity (how rare it is to see the card in draft). While increases in mana cost are associated with worse win rates for common and uncommon cards, for rare and mythic rare cards, a mana cost one higher increases the expected win rate when seen by 0.65% and 0.55%, respectively, with an approximate error of \\(\\pm\\) 0.3%."
+    "text": "Magic: the Gathering is a fun game, but winning at Magic: the Gathering is even more fun, and to do that, it’s good to know which cards let us win the most. We built a data set combining data from 17lands and MTGJSON about cards from draftable sets released in the last 2 years. We specifically cared about ‘Game in Hand Win Rate’ , the percentage of time you won a game when you saw a given card in your hand during that game.\nWe modeled this win rate, a percentage between 0% and 100% (though generally between 35% and 70%), as a linear function of mana cost (the cost of a card in-game), and rarity (how rare it is to see the card in draft). While increases in mana cost are associated with worse win rates for common and uncommon cards, for rare and mythic rare cards, a mana cost one higher increases the expected win rate when seen by 0.65% and 0.55%, respectively, with an approximate error of \\(\\pm\\) 0.3%."
   },
   {
     "objectID": "about.html",
@@ -53,6 +60,6 @@
     "href": "predictions.html",
     "title": "Predictions",
     "section": "",
-    "text": "WIP"
+    "text": "Red dots here represent the actual win rates for each of these types of cards in Bloomburrow, the most recent Magic set, as of August 6th."
   }
 ]
