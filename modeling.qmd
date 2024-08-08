@@ -71,7 +71,6 @@ first_fit <- brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue,
 
 ```
 
-
 ```{r}
 #| label: graph_1
 
@@ -88,25 +87,28 @@ Rarity = c("C", "U", "R", "M")
 manaValue = c(1,2,3,4,5)
 ndata <- expand_grid(Rarity, manaValue)
 #reorder puts the columns generated in a more readable order for us"
-reorder <- c("1_Mana Common", "2_Mana Common", "3_Mana Common", "4_Mana Common", "5_Mana Common", "1_Mana Uncommon", "2_Mana Uncommon", "3_Mana Uncommon", "4_Mana Uncommon", "5_Mana Uncommon", "1_Mana Rare", "2_Mana Rare", "3_Mana Rare", "4_Mana Rare", "5_Mana Rare", "1_Mana Mythic Rare", "2_Mana Mythic Rare", "3_Mana Mythic Rare", "4_Mana Mythic Rare", "5_Mana Mythic Rare")
+reorder <- c("1 Mana Commons", "2 Mana Commons", "3 Mana Commons", "4 Mana Commons", "5 Mana Commons", "1 Mana Uncommons", "2 Mana Uncommons", "3 Mana Uncommons", "4 Mana Uncommons", "5 Mana Uncommons", "1 Mana Rares", "2 Mana Rares", "3 Mana Rares", "4 Mana Rares", "5 Mana Rares", "1 Mana Mythic Rares", "2 Mana Mythic Rares", "3 Mana Mythic Rares", "4 Mana Mythic Rares", "5 Mana Mythic Rares")
 
-main_graph <- first_fit |> add_epred_draws(newdata = ndata) |>
+fixed_plot <- first_fit |> add_epred_draws(newdata = ndata) |>
   ungroup() |>
   #This...odd line is to make the names pivot_wider generates more readable, so we get 3_Mana Common, for example.
-  mutate(Rarity = recode(Rarity, C = "Mana Common", U = "Mana Uncommon", R = "Mana Rare", M = "Mana Mythic Rare")) |>
+  mutate(Rarity = recode(Rarity, C = "Mana Commons", U = "Mana Uncommons", R = "Mana Rares", M = "Mana Mythic Rares")) |>
   select(Rarity, manaValue, .epred) |>
   pivot_wider(names_from = c(manaValue, Rarity),
               values_from = .epred,
               values_fn = list) |>
   unnest(cols = everything()) |>
   pivot_longer(cols = everything(), names_to = "Category", values_to = "epred") |> 
-  mutate(Category = fct_relevel(factor(Category), reorder)) |>
   #ColorGroup lets us group the manacosts by color in the graph, for readability
-  mutate(ColorGroup = as.factor(substr(Category, 1, 1))) |>
+  mutate(ColorGroup = as.factor(substr(Category, 1, 1)))
+
+fixed_plot$Category <- gsub("_", " ", fixed_plot$Category)
+
+main_graph <- fixed_plot |> mutate(Category =    fct_relevel(factor(Category), reorder)) |> 
   ggplot(aes(x = epred, y = Category)) +
     stat_slab(aes(fill = ColorGroup), color = "black", alpha = 0.7) +
     labs(title = "Posteriors for Card Win Rate Given Rarity and Mana Cost", subtitle = "Higher mana costs imply better high rarity cards, but worse low rarity cards",
-       x = "Predicted Win Rate",
+       x = "Predicted Win Rate (Percentage)",
        y = "Rarity and Mana Cost") +
     theme(legend.position = "none")
 
@@ -116,6 +118,10 @@ ggsave("main_graph.png", main_graph)
 
 ```{r}
 #| label: graph_2
+
+reorder <- c("1 Mana Commons", "2 Mana Commons", "3 Mana Commons", "4 Mana Commons", "5 Mana Commons", "1 Mana Uncommons", "2 Mana Uncommons", "3 Mana Uncommons", "4 Mana Uncommons", "5 Mana Uncommons", "1 Mana Rares", "2 Mana Rares", "3 Mana Rares", "4 Mana Rares", "5 Mana Rares", "2 Mana Mythic Rares", "3 Mana Mythic Rares", "4 Mana Mythic Rares", "5 Mana Mythic Rares")
+
+
 
 blb_cards <- read_csv("data/blb-card-ratings-2024-08-06.csv") |>
   rename(GIH_WR = `GIH WR`) |>
@@ -130,15 +136,22 @@ merged_blb <- blb_cards |>
   "many-to-many")
 
 blb_winrates <- merged_blb[merged_blb$manaValue %in% c(1,2,3,4,5), ] |>
-  mutate(Rarity = recode(Rarity, C = "Common", U = "Uncommon", R = "Rare", M = "Mythic Rare")) |>
-  group_by(manaValue, Rarity) |>
+  mutate(Rarity = recode(Rarity, C = "Mana Commons", U = "Mana Uncommons", R = "Mana Rares", M = "Mana Mythic Rares")) |>
+  mutate(Rarity = fct_relevel(factor(Rarity), c("Mana Commons", "Mana Uncommons", "Mana Rares", "Mana Mythic Rares"))) 
+  
+blb_winrates$Category <- paste(blb_winrates$manaValue, blb_winrates$Rarity, sep = " ")
+  
+blb_winrates <- blb_winrates |>
+  mutate(Category = fct_relevel(factor(Category), reorder)) |>
+  group_by(Category) |>
   summarise(avg_GIH_WR = mean(GIH_WR, na.rm = TRUE))
 
-blb_winrates
+blb_winrates 
 
+alt_graph <- main_graph + geom_point(data = blb_winrates, aes(x = avg_GIH_WR, y = Category), color = "red", size = 3)
+
+alt_graph
+
+ggsave("pred_graph.png", alt_graph)
 
 ```
-
-
-
-
