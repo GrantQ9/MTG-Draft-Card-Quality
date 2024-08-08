@@ -38,36 +38,24 @@ c_standard_data <- standard_data |>
 
 #Select the current standard sets
 c_card_data <-
+  #Select the last two years of Standard-legal draftable Magic sets
   card_text_data[card_text_data$setCode %in% c("BRO", "LCI", "MKM", "MOM", "ONE", "OTJ", "WOE", "BRR", "OTP", "BIG", "DMU"),] |>
   select(name, manaValue, power, toughness, types, keywords) |>
   rename(Name = name) |>
-  distinct(.keep_all = TRUE) |>
-  mutate(isCreature = grepl("Creature", types, fixed = TRUE))
+  #Some cards are reprinted in multiple sets: this shouldn't cause issues with our analysis (the variables we care about from this data should remain constant), but just to be safe we delete duplicates
+  distinct(.keep_all = TRUE) 
 
 # Below code removes 2nd name for double sided cards: note that if modal double sided cards are in the data, this would have to change to account for both sides of the card.
 c_card_data$Name <- ifelse(grepl(" // ", c_card_data$Name), sub(" // .*", "", c_card_data$Name), c_card_data$Name)
 ```
 
 ```{r}
-#| label: merge_and_creature
+#| label: merge
 
 merged_data <- c_standard_data |>
   left_join(c_card_data, join_by(Name), relationship =
   "many-to-many") 
 
-merged_data[c("Color")][is.na(merged_data[c("Color")])] <- "C"
-
-creature_data <- merged_data |> 
-  filter(isCreature == TRUE) |>
-  mutate(hasFlying = grepl("Flying", keywords, fixed = TRUE)) |>
-  mutate(hasTrample = grepl("Trample", keywords, fixed = TRUE)) |>
-  mutate(powerTier = case_when(power < 2 ~ 1,
-                             power > 3 ~ 3,
-                             TRUE ~ 2)) |>
-  mutate(toughnessTier = case_when(toughness < 2 ~ 1,
-                             toughness > 3 ~ 3,
-                             TRUE ~ 2)) |>
-  select(Rarity, GIH_WR, manaValue, powerTier, toughnessTier, hasFlying, hasTrample)
 ```
 
 ```{r}
@@ -85,34 +73,6 @@ first_fit <- brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue,
 
 
 ```{r}
-#| label: model_2
-#| cache: true
-
-second_fit <- brm(formula = GIH_WR ~ Rarity + manaValue + powerTier + toughnessTier + hasFlying + hasTrample + Rarity * manaValue + hasFlying*manaValue + hasTrample*manaValue + powerTier*manaValue + toughnessTier*manaValue + Rarity*manaValue*powerTier,
-                   data = creature_data,
-                   family = gaussian(),
-                   refresh = 0,
-                   silent = 2,
-                   seed = 31)
-```
-
-```{r}
-#| label: model_3
-#| cache: true
-
-mono_color <- merged_data |>
-  filter(Color == "G" | Color == "W" | Color == "U" | Color == "B" | Color == "R" | Color == "C")
-
-third_fit <-brm(formula = GIH_WR ~ Rarity + manaValue + Rarity * manaValue + Color,
-                   data = mono_color,
-                   family = gaussian(),
-                   refresh = 0,
-                   silent = 2,
-                   seed = 31)
-```
-
-
-```{r}
 #| label: graph_1
 
 pp_check(first_fit)
@@ -121,17 +81,18 @@ pp_check(first_fit)
 mana_rarity_reg_table <- first_fit |> tbl_regression()
 mana_rarity_reg_table
 
-gt::gtsave(as_gt(mana_rarity_reg_table), "mana_rarity_reg_table.png")
+#Below chunk saves table as png, enable if you want this
+# gt::gtsave(as_gt(mana_rarity_reg_table), "mana_rarity_reg_table.png")
 
 Rarity = c("C", "U", "R", "M")
 manaValue = c(1,2,3,4,5)
 ndata <- expand_grid(Rarity, manaValue)
-reorder <- c('1_Mana Common', "1_Mana Uncommon", '1_Mana Rare', '1_Mana Mythic Rare', '2_Mana Common', "2_Mana Uncommon", '2_Mana Rare', '2_Mana Mythic Rare','3_Mana Common', "3_Mana Uncommon", '3_Mana Rare', '3_Mana Mythic Rare','4_Mana Common', "4_Mana Uncommon", '4_Mana Rare', '4_Mana Mythic Rare','5_Mana Common', "5_Mana Uncommon", '5_Mana Rare', '5_Mana Mythic Rare')
-
+#reorder puts the columns generated in a more readable order for us"
+reorder <- c("1_Mana Common", "2_Mana Common", "3_Mana Common", "4_Mana Common", "5_Mana Common", "1_Mana Uncommon", "2_Mana Uncommon", "3_Mana Uncommon", "4_Mana Uncommon", "5_Mana Uncommon", "1_Mana Rare", "2_Mana Rare", "3_Mana Rare", "4_Mana Rare", "5_Mana Rare", "1_Mana Mythic Rare", "2_Mana Mythic Rare", "3_Mana Mythic Rare", "4_Mana Mythic Rare", "5_Mana Mythic Rare")
 
 main_graph <- first_fit |> add_epred_draws(newdata = ndata) |>
   ungroup() |>
-  #mutate(manaValue = as.Character(manaValue)) |>
+  #This...odd line is to make the names pivot_wider generates more readable, so we get 3_Mana Common, for example.
   mutate(Rarity = recode(Rarity, C = "Mana Common", U = "Mana Uncommon", R = "Mana Rare", M = "Mana Mythic Rare")) |>
   select(Rarity, manaValue, .epred) |>
   pivot_wider(names_from = c(manaValue, Rarity),
@@ -140,8 +101,10 @@ main_graph <- first_fit |> add_epred_draws(newdata = ndata) |>
   unnest(cols = everything()) |>
   pivot_longer(cols = everything(), names_to = "Category", values_to = "epred") |> 
   mutate(Category = fct_relevel(factor(Category), reorder)) |>
+  #ColorGroup lets us group the manacosts by color in the graph, for readability
+  mutate(ColorGroup = as.factor(substr(Category, 1, 1))) |>
   ggplot(aes(x = epred, y = Category)) +
-    stat_slab(aes(fill = Category), color = "black", alpha = 0.7) +
+    stat_slab(aes(fill = ColorGroup), color = "black", alpha = 0.7) +
     labs(title = "Posteriors for Card Win Rate Given Rarity and Mana Cost", subtitle = "Higher mana costs imply better high rarity cards, but worse low rarity cards",
        x = "Predicted Win Rate",
        y = "Rarity and Mana Cost") +
@@ -151,6 +114,30 @@ main_graph
 ggsave("main_graph.png", main_graph)
 ```
 
+```{r}
+#| label: graph_2
+
+blb_cards <- read_csv("data/blb-card-ratings-2024-08-06.csv") |>
+  rename(GIH_WR = `GIH WR`) |>
+  #Have GIH_WR stored in R numerically for manipulation
+  mutate(GIH_WR = as.numeric(sub("%","",GIH_WR))) |>
+  select(Name, Rarity, GIH_WR)
+blb_card_data <- card_text_data[card_text_data$setCode %in% c("BLB"),] |> select(name, manaValue) |>
+   rename(Name = name)
+
+merged_blb <- blb_cards |>
+  left_join(blb_card_data, join_by(Name), relationship =
+  "many-to-many")
+
+blb_winrates <- merged_blb[merged_blb$manaValue %in% c(1,2,3,4,5), ] |>
+  mutate(Rarity = recode(Rarity, C = "Common", U = "Uncommon", R = "Rare", M = "Mythic Rare")) |>
+  group_by(manaValue, Rarity) |>
+  summarise(avg_GIH_WR = mean(GIH_WR, na.rm = TRUE))
+
+blb_winrates
+
+
+```
 
 
 

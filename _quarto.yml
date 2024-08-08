@@ -9,8 +9,6 @@ website:
         text: Overview
       - href: model.qmd
         text: Model
-      - href: creatures.qmd
-        text: Creature Analysis
       - href: predictions.qmd
         text: Predictions
       - href: sources.qmd
